@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  postgis:
+    image: postgis/postgis:15-3.4
+    environment:
+      POSTGRES_USER: websig
+      POSTGRES_PASSWORD: websig
+      POSTGRES_DB: websig_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+
+volumes:
+  postgis_data:

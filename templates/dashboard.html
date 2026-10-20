@@ -1,0 +1,56 @@
+{% extends "layout.html" %}
+
+{% block title %}Tableau de bord - AgriSIG{% endblock %}
+
+{% block content %}
+{% set charts = [
+  {'n': 1, 'title': "Superficie attribuée par coopérative", 'unit': 'ha'},
+  {'n': 2, 'title': "Superficie cultivée par coopérative", 'unit': 'ha'},
+  {'n': 3, 'title': "Taux d'utilisation de la superficie attribuée", 'unit': '%'},
+  {'n': 4, 'title': "Production par coopérative", 'unit': 'kg'},
+  {'n': 5, 'title': "Effectifs hommes / femmes par coopérative", 'unit': 'pers.'},
+  {'n': 6, 'title': "Quantité de NPK par coopérative", 'unit': 'kg'},
+  {'n': 7, 'title': "Quantité d'urée par coopérative", 'unit': 'kg'},
+  {'n': 8, 'title': "Quantité d'herbicide par coopérative", 'unit': 'L'},
+  {'n': 9, 'title': "Quantité d'insecticide par coopérative", 'unit': 'L'},
+  {'n': 10, 'title': "Production écoulée par coopérative", 'unit': 'kg'},
+  {'n': 11, 'title': "Production restante par coopérative", 'unit': 'kg'},
+  {'n': 12, 'title': "Variétés cultivées par coopérative", 'unit': 'suivis'},
+] %}
+
+<h1 style="margin-bottom:0.4rem;">Tableau de bord</h1>
+<p class="hero-text">Carte dynamique et graphiques générés à partir des données enregistrées.</p>
+
+<div>
+  <span style="display:block; font-size:0.85rem; font-weight:700; color:var(--muted); margin-bottom:0.2rem;">Campagne :</span>
+  <div id="campaignChips" class="chip-row" role="listbox" aria-label="Sélection de la campagne"></div>
+</div>
+
+<div class="card">
+  <div class="card-head">
+    <h2 style="font-size:1.05rem;">Carte dynamique</h2>
+    <span class="mini-chip" id="layerCount">Couches</span>
+  </div>
+  <div id="map"></div>
+</div>
+
+<div class="charts-grid">
+  {% for c in charts %}
+    <div class="card chart-card">
+      <div class="card-head">
+        <h3>{{ c.n }}. {{ c.title }}</h3>
+        <span class="mini-chip">{{ c.unit }}</span>
+      </div>
+      <div id="chart{{ c.n }}" class="chart-body"></div>
+      <div id="comment{{ c.n }}" class="chart-comment"></div>
+    </div>
+  {% endfor %}
+</div>
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+
+{% endblock %}

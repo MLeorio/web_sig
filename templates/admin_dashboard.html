@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+{% block title %}Administration - AgriSIG{% endblock %}
+
+{% block content %}
+<div class="admin-nav">
+  <a class="is-active">Vue d'ensemble</a>
+  <a href="{{ url_for('admin.suivis_list') }}">Gestion des suivis</a>
+  {% if user.role == 'administrateur' %}
+    <a href="{{ url_for('admin.agents_list') }}">Gestion des agents</a>
+    <a href="{{ url_for('admin.historique') }}">Historique des connexions</a>
+    <a href="{{ url_for('admin.journal') }}">Journal des activités</a>
+  {% endif %}
+</div>
+
+<h1 style="margin-bottom:0.3rem;">Bonjour, {{ user.nom_complet }}</h1>
+<p class="hero-text">
+  Connecté en tant que <strong>{{ 'Administrateur' if user.role == 'administrateur' else 'Agent' }}</strong>.
+</p>
+
+<div class="kpi-grid" style="margin-top:1.3rem;">
+  <div class="kpi-card"><div class="lbl">Suivis enregistrés</div><div class="val">{{ kpis.suivis }}</div></div>
+  <div class="kpi-card"><div class="lbl">Coopératives</div><div class="val">{{ kpis.cooperatives }}</div></div>
+  {% if user.role == 'administrateur' %}
+    <div class="kpi-card"><div class="lbl">Agents actifs</div><div class="val">{{ kpis.agents_actifs }}</div></div>
+  {% endif %}
+  <div class="kpi-card"><div class="lbl">Dernière campagne</div><div class="val">{{ kpis.derniere_campagne or '—' }}</div></div>
+</div>
+
+<div class="section-links" style="margin-top:1.3rem;">
+  <a class="section-link" href="{{ url_for('admin.suivis_list') }}">
+    <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H14" stroke="#123f2c" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+    <div><h3>Gestion des suivis</h3><p>Créer, consulter, {{ 'modifier et supprimer' if user.role == 'administrateur' else 'modifier' }} les suivis de campagne.</p></div>
+  </a>
+  {% if user.role == 'administrateur' %}
+    <a class="section-link" href="{{ url_for('admin.agents_list') }}">
+      <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3" stroke="#123f2c" stroke-width="1.8"/><path d="M3 20C3 16.5 5.6 14.5 9 14.5C12.4 14.5 15 16.5 15 20" stroke="#123f2c" stroke-width="1.8"/></svg></span>
+      <div><h3>Gestion des agents</h3><p>Créer un agent, activer/désactiver, réinitialiser un mot de passe.</p></div>
+    </a>
+    <a class="section-link" href="{{ url_for('admin.historique') }}">
+      <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#123f2c" stroke-width="1.8"/><path d="M12 7V12L15 14" stroke="#123f2c" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      <div><h3>Historique des connexions</h3><p>Qui s'est connecté, quand, avec quel résultat.</p></div>
+    </a>
+    <a class="section-link" href="{{ url_for('admin.journal') }}">
+      <span class="ic"><svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 3H14L19 8V21H6V3Z" stroke="#123f2c" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12H15M9 16H15" stroke="#123f2c" stroke-width="1.8" stroke-linecap="round"/></svg></span>
+      <div><h3>Journal des activités</h3><p>Chaque création, modification ou suppression tracée.</p></div>
+    </a>
+  {% endif %}
+</div>
+{% endblock %}

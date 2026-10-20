@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ 'Modifier un suivi' if mode == 'edit' else 'Nouveau suivi' }} - AgriSIG{% endblock %}
+
+{% block content %}
+<div class="admin-nav">
+  <a href="{{ url_for('admin.dashboard') }}">Vue d'ensemble</a>
+  <a href="{{ url_for('admin.suivis_list') }}" class="is-active">Gestion des suivis</a>
+  {% if session.get('role') == 'administrateur' %}
+    <a href="{{ url_for('admin.agents_list') }}">Gestion des agents</a>
+    <a href="{{ url_for('admin.historique') }}">Historique des connexions</a>
+    <a href="{{ url_for('admin.journal') }}">Journal des activités</a>
+  {% endif %}
+</div>
+
+<h1 style="margin-bottom:0.4rem;">{{ 'Modifier le suivi #' ~ suivi_id if mode == 'edit' else 'Nouveau suivi de campagne' }}</h1>
+<p class="hero-text">
+  {{ 'Modifiez les informations puis enregistrez les changements.' if mode == 'edit'
+     else 'Ajoutez un suivi de campagne pour alimenter la base de données.' }}
+</p>
+<div style="margin: 0.7rem 0 0;">
+  <span class="badge badge-accent">
+    <svg width="9" height="9" viewBox="0 0 24 24" fill="none"><rect x="5" y="11" width="14" height="9" rx="2.5" stroke="#123f2c" stroke-width="2.4"/><path d="M8 11V7.5C8 5 9.8 3 12 3C14.2 3 16 5 16 7.5V11" stroke="#123f2c" stroke-width="2.4"/></svg>
+    Saisie sécurisée
+  </span>
+</div>
+
+<form method="post"
+      {% if mode == 'edit' %}data-confirm="Voulez-vous enregistrer les modifications apportées à ce suivi ?"{% endif %}>
+  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+
+  {% for section in sections %}
+    <div class="form-section">
+      <div class="form-section-head">
+        <span class="form-section-icon"
+          {% if section.title == 'Travaux agricoles' or section.title == 'Intrants' %}style="background: var(--earth-soft);"
+          {% elif section.title == 'Effectifs' %}style="background: var(--water-soft);"{% endif %}>
+          {% if section.title == 'Identification' %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M3 7L12 3L21 7L12 11L3 7Z" stroke="#123f2c" stroke-width="1.7" stroke-linejoin="round"/><path d="M7 9.5V15C7 15 9 17 12 17C15 17 17 15 17 15V9.5" stroke="#123f2c" stroke-width="1.7"/></svg>
+          {% elif section.title == 'Effectifs' %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><circle cx="9" cy="8" r="3.2" stroke="#386fa4" stroke-width="1.7"/><path d="M3 20C3 16.5 5.6 14.5 9 14.5C12.4 14.5 15 16.5 15 20" stroke="#386fa4" stroke-width="1.7"/><circle cx="17.5" cy="9" r="2.5" stroke="#386fa4" stroke-width="1.7"/><path d="M14.5 20C14.7 17 16.7 15.3 19 15.3C21.6 15.3 21.5 18 21.5 20" stroke="#386fa4" stroke-width="1.7"/></svg>
+          {% elif section.title == 'Superficies' %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="18" height="18" rx="2" stroke="#123f2c" stroke-width="1.7"/><path d="M3 9H21M9 3V21" stroke="#123f2c" stroke-width="1.7"/></svg>
+          {% elif section.title == 'Travaux agricoles' %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="3" y="4" width="18" height="17" rx="2.5" stroke="#a8662f" stroke-width="1.7"/><path d="M3 9H21M8 2V5.5M16 2V5.5" stroke="#a8662f" stroke-width="1.7" stroke-linecap="round"/></svg>
+          {% elif section.title == 'Intrants' %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><rect x="7" y="2" width="10" height="20" rx="4" stroke="#a8662f" stroke-width="1.7"/><path d="M7 15H17" stroke="#a8662f" stroke-width="1.7"/></svg>
+          {% elif section.title == 'Récolte et production' %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 6 8 6 13.5C6 17.6 8.7 21 12 21C15.3 21 18 17.6 18 13.5C18 8 12 2 12 2Z" stroke="#123f2c" stroke-width="1.7"/></svg>
+          {% else %}
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none"><path d="M4 6H20M4 12H20M4 18H20" stroke="#123f2c" stroke-width="1.7" stroke-linecap="round"/></svg>
+          {% endif %}
+        </span>
+        <h3>{{ section.title }}</h3>
+      </div>
+
+      <div class="form-grid-2">
+        {% for field in section.fields %}
+          <div class="field">
+            <label for="{{ field.name }}">{{ field.label }}</label>
+            {% if field.type == 'textarea' %}
+              <textarea id="{{ field.name }}" name="{{ field.name }}" placeholder="{{ field.label }}">{{ field.value or '' }}</textarea>
+            {% elif field.type == 'select' %}
+              <select id="{{ field.name }}" name="{{ field.name }}" {% if field.required %}required{% endif %}>
+                {% for value, label in field.options %}
+                  <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
+                {% endfor %}
+              </select>
+            {% elif field.type == 'checkbox' %}
+              <label style="display:flex; align-items:center; font-weight:500;">
+                <input type="checkbox" id="{{ field.name }}" name="{{ field.name }}" value="true"
+                  {% if field.value in (True, 'true', 'on', '1') %}checked{% endif %} />
+                Oui
+              </label>
+            {% else %}
+              <input id="{{ field.name }}" name="{{ field.name }}" type="{{ field.type }}"
+                value="{{ field.value or '' }}"
+                {% if field.step %}step="{{ field.step }}"{% endif %}
+                {% if field.required %}required{% endif %} />
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  {% endfor %}
+
+  <div class="sticky-cta" style="display:flex; gap:0.75rem;">
+    {% if mode == 'edit' %}
+      <a class="btn btn-secondary" href="{{ url_for('admin.suivis_detail', id_suivi=suivi_id) }}">Annuler</a>
+      <button class="btn btn-primary" type="submit" style="flex:1;">Enregistrer les modifications</button>
+    {% else %}
+      <button class="btn btn-primary btn-block" type="submit">Enregistrer</button>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

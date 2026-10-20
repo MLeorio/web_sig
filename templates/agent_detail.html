@@ -1,0 +1,96 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ agent.nom_complet }} - AgriSIG{% endblock %}
+
+{% block content %}
+<div class="admin-nav">
+  <a href="{{ url_for('admin.dashboard') }}">Vue d'ensemble</a>
+  <a href="{{ url_for('admin.suivis_list') }}">Gestion des suivis</a>
+  <a href="{{ url_for('admin.agents_list') }}" class="is-active">Gestion des agents</a>
+  <a href="{{ url_for('admin.historique') }}">Historique des connexions</a>
+  <a href="{{ url_for('admin.journal') }}">Journal des activités</a>
+</div>
+
+<div class="card">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.6rem; margin-bottom:1.2rem;">
+    <h2 style="margin:0; font-size:1.15rem;"><span class="avatar-sm">{{ agent.nom_complet[:2]|upper }}</span>{{ agent.nom_complet }}</h2>
+    {% if agent.actif %}<span class="badge badge-success">Actif</span>{% else %}<span class="badge badge-danger">Inactif</span>{% endif %}
+  </div>
+
+  <div class="detail-grid" style="margin-bottom:1.4rem;">
+    <div class="detail-item"><div class="lbl">Identifiant</div><div class="val">{{ agent.nom_utilisateur }}</div></div>
+    <div class="detail-item"><div class="lbl">Rôle</div><div class="val">{{ 'Administrateur' if agent.role == 'administrateur' else 'Agent' }}</div></div>
+    <div class="detail-item"><div class="lbl">E-mail</div><div class="val">{{ agent.email or '—' }}</div></div>
+    <div class="detail-item"><div class="lbl">Créé le</div><div class="val">{{ agent.date_creation.strftime('%d/%m/%Y') }}</div></div>
+    <div class="detail-item"><div class="lbl">Dernière connexion</div><div class="val">{{ agent.derniere_connexion.strftime('%d/%m/%Y %H:%M') if agent.derniere_connexion else 'Jamais' }}</div></div>
+  </div>
+
+  <div style="display:flex; gap:0.6rem; flex-wrap:wrap; margin-bottom:1.6rem;">
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('admin.agents_edit', user_id=agent.id) }}">Modifier</a>
+    {% if agent.actif %}
+      <form method="post" action="{{ url_for('admin.agents_deactivate', user_id=agent.id) }}"
+            data-confirm="Voulez-vous désactiver le compte de {{ agent.nom_complet }} ?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button class="btn btn-danger btn-sm" type="submit" {% if agent.id == session.get('user_id') %}disabled{% endif %}>Désactiver</button>
+      </form>
+    {% else %}
+      <form method="post" action="{{ url_for('admin.agents_activate', user_id=agent.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button class="btn btn-primary btn-sm" type="submit">Activer</button>
+      </form>
+    {% endif %}
+  </div>
+
+  <div class="detail-section-title"><i></i>Réinitialiser le mot de passe</div>
+  <form method="post" action="{{ url_for('admin.agents_reset_password', user_id=agent.id) }}"
+        data-confirm="Réinitialiser le mot de passe de {{ agent.nom_complet }} ?"
+        style="display:flex; gap:0.6rem; align-items:flex-end; flex-wrap:wrap; margin-bottom:1.6rem;">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+    <div class="field" style="margin:0;">
+      <label>Nouveau mot de passe</label>
+      <input type="password" name="new_password" required minlength="4" placeholder="Nouveau mot de passe" />
+    </div>
+    <button class="btn btn-secondary btn-sm" type="submit">Réinitialiser</button>
+  </form>
+
+  <div class="detail-section-title"><i></i>Dernières connexions</div>
+  <div class="table-wrap" style="margin-bottom:1.4rem;">
+    <table class="pro">
+      <thead><tr><th>Date</th><th>Heure</th><th>Événement</th></tr></thead>
+      <tbody>
+        {% for c in connexions %}
+          <tr>
+            <td>{{ c.date_heure.strftime('%d/%m/%Y') }}</td>
+            <td>{{ c.date_heure.strftime('%H:%M') }}</td>
+            <td>
+              {% if c.type_evenement == 'connexion_reussie' %}<span class="badge badge-success">Connexion réussie</span>
+              {% elif c.type_evenement == 'echec_connexion' %}<span class="badge badge-danger">Échec de connexion</span>
+              {% else %}<span class="badge badge-water">Déconnexion</span>{% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="3" style="text-align:center; color:var(--muted); padding:1.5rem;">Aucune connexion enregistrée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="detail-section-title"><i></i>Dernières activités</div>
+  <div class="table-wrap">
+    <table class="pro">
+      <thead><tr><th>Date / heure</th><th>Action</th></tr></thead>
+      <tbody>
+        {% for act in activites %}
+          <tr><td>{{ act.date_heure.strftime('%d/%m/%Y %H:%M') }}</td><td>{{ act.details or act.action }}</td></tr>
+        {% else %}
+          <tr><td colspan="2" style="text-align:center; color:var(--muted); padding:1.5rem;">Aucune activité enregistrée.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top:1.4rem;">
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('admin.agents_list') }}">← Retour à la liste des comptes</a>
+  </div>
+</div>
+{% endblock %}

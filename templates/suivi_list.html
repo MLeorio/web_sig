@@ -1,0 +1,93 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestion des suivis - AgriSIG{% endblock %}
+
+{% block content %}
+<div class="admin-nav">
+  <a href="{{ url_for('admin.dashboard') }}">Vue d'ensemble</a>
+  <a class="is-active">Gestion des suivis</a>
+  {% if session.get('role') == 'administrateur' %}
+    <a href="{{ url_for('admin.agents_list') }}">Gestion des agents</a>
+    <a href="{{ url_for('admin.historique') }}">Historique des connexions</a>
+    <a href="{{ url_for('admin.journal') }}">Journal des activités</a>
+  {% endif %}
+</div>
+
+<h1 style="margin-bottom:0.3rem;">Gestion des suivis de campagne</h1>
+<p class="hero-text">{{ total }} suivi{{ 's' if total != 1 else '' }} enregistré{{ 's' if total != 1 else '' }} dans PostgreSQL.</p>
+
+<div class="card" style="margin-top:1.2rem;">
+  <form method="get" class="table-toolbar">
+    <input type="text" name="q" value="{{ filters.q }}" placeholder="🔎 Rechercher une coopérative..." style="min-width:220px;" />
+    <select name="campagne_id" onchange="this.form.submit()">
+      <option value="">Toutes les campagnes</option>
+      {% for id, annee in campagnes %}
+        <option value="{{ id }}" {% if filters.campagne_id == id %}selected{% endif %}>{{ annee }}</option>
+      {% endfor %}
+    </select>
+    <select name="cooperative_id" onchange="this.form.submit()">
+      <option value="">Toutes les coopératives</option>
+      {% for id, nom in cooperatives %}
+        <option value="{{ id }}" {% if filters.cooperative_id == id %}selected{% endif %}>{{ nom }}</option>
+      {% endfor %}
+    </select>
+    <select name="variete_id" onchange="this.form.submit()">
+      <option value="">Toutes les variétés</option>
+      {% for id, nom in varietes %}
+        <option value="{{ id }}" {% if filters.variete_id == id %}selected{% endif %}>{{ nom }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn btn-secondary btn-sm" type="submit">Filtrer</button>
+    <a class="btn btn-primary btn-sm" style="margin-left:auto;" href="{{ url_for('admin.suivis_create') }}">+ Nouveau suivi</a>
+  </form>
+
+  <div class="table-wrap">
+    <table class="pro">
+      <thead>
+        <tr>
+          <th>Campagne</th><th>Coopérative</th><th>Variété</th>
+          <th>Sup. attribuée</th><th>Sup. cultivée</th><th>Production</th>
+          <th>Rendement</th><th>Récolte</th><th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for r in rows %}
+          <tr>
+            <td>{{ r.annee }}</td>
+            <td><b>{{ r.nom_cooperative }}</b></td>
+            <td>{{ r.nom_variete }}</td>
+            <td>{{ '%.2f'|format(r.superficie_attribuee) ~ ' ha' if r.superficie_attribuee is not none else '—' }}</td>
+            <td>{{ '%.2f'|format(r.superficie_cultivee) ~ ' ha' if r.superficie_cultivee is not none else '—' }}</td>
+            <td>{{ '%.2f'|format(r.production_kg) ~ ' kg' if r.production_kg is not none else '—' }}</td>
+            <td>{{ '%.2f'|format(r.rendement_ha) ~ ' kg/ha' if r.rendement_ha is not none else '—' }}</td>
+            <td>{{ r.date_recolte if r.date_recolte else '—' }}</td>
+            <td class="row-actions">
+              <a class="btn btn-ghost btn-sm" href="{{ url_for('admin.suivis_detail', id_suivi=r.id_suivi) }}">Voir</a>
+              <a class="btn btn-secondary btn-sm" href="{{ url_for('admin.suivis_edit', id_suivi=r.id_suivi) }}">Modifier</a>
+              {% if session.get('role') == 'administrateur' %}
+                <form method="post" action="{{ url_for('admin.suivis_delete', id_suivi=r.id_suivi) }}" style="display:inline;"
+                      data-confirm="Attention : cette action supprimera définitivement ce suivi de campagne. Cette opération est irréversible. Voulez-vous continuer ?">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="9" style="text-align:center; color:var(--muted); padding:2rem;">Aucun suivi ne correspond à ces critères.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if total_pages > 1 %}
+    <div class="pagination">
+      {% for p in range(1, total_pages + 1) %}
+        <a href="{{ url_for('admin.suivis_list', page=p, campagne_id=filters.campagne_id, cooperative_id=filters.cooperative_id, variete_id=filters.variete_id, q=filters.q) }}">
+          <button class="{{ 'is-active' if p == page else '' }}" type="button">{{ p }}</button>
+        </a>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

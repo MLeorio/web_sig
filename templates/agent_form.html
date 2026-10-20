@@ -1,0 +1,36 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ 'Modifier un agent' if mode == 'edit' else 'Créer un agent' }} - AgriSIG{% endblock %}
+
+{% block content %}
+<div class="admin-nav">
+  <a href="{{ url_for('admin.dashboard') }}">Vue d'ensemble</a>
+  <a href="{{ url_for('admin.suivis_list') }}">Gestion des suivis</a>
+  <a href="{{ url_for('admin.agents_list') }}" class="is-active">Gestion des agents</a>
+  <a href="{{ url_for('admin.historique') }}">Historique des connexions</a>
+  <a href="{{ url_for('admin.journal') }}">Journal des activités</a>
+</div>
+
+<h1 style="margin-bottom:0.3rem;">{{ 'Modifier le compte de ' ~ agent.nom_complet if mode == 'edit' else 'Créer un compte agent' }}</h1>
+<p class="hero-text">Seul un administrateur peut créer ou modifier un compte.</p>
+
+<div class="card" style="margin-top:1.2rem; max-width:560px;">
+  <form method="post">
+    {{ form.hidden_tag() }}
+    <div class="field">{{ form.nom_complet.label }}{{ form.nom_complet(placeholder="ex. Jean Dupont") }}</div>
+    <div class="field">{{ form.nom_utilisateur.label }}{{ form.nom_utilisateur(placeholder="ex. jean") }}</div>
+    <div class="field">{{ form.email.label }}{{ form.email(placeholder="optionnel") }}</div>
+    <div class="field">
+      {{ form.password.label }}{{ form.password(placeholder="Laisser vide pour ne pas changer" if mode == 'edit' else "Mot de passe initial") }}
+    </div>
+    <div class="field">{{ form.confirm_password.label }}{{ form.confirm_password(placeholder="Confirmer le mot de passe") }}</div>
+    <div class="field">{{ form.role.label }}{{ form.role() }}</div>
+    <div class="field" style="display:flex; align-items:center; gap:0.5rem;">{{ form.actif() }}{{ form.actif.label }}</div>
+
+    <div style="margin-top:1.4rem; display:flex; gap:0.6rem;">
+      <a class="btn btn-secondary" href="{{ url_for('admin.agents_list') }}">Annuler</a>
+      <button class="btn btn-primary" type="submit">{{ 'Enregistrer les modifications' if mode == 'edit' else 'Créer le compte' }}</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

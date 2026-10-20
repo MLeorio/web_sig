@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block title %}Gestion des agents - AgriSIG{% endblock %}
+
+{% block content %}
+<div class="admin-nav">
+  <a href="{{ url_for('admin.dashboard') }}">Vue d'ensemble</a>
+  <a href="{{ url_for('admin.suivis_list') }}">Gestion des suivis</a>
+  <a class="is-active">Gestion des agents</a>
+  <a href="{{ url_for('admin.historique') }}">Historique des connexions</a>
+  <a href="{{ url_for('admin.journal') }}">Journal des activités</a>
+</div>
+
+<h1 style="margin-bottom:0.3rem;">Gestion des comptes</h1>
+<p class="hero-text">{{ agents|length }} compte{{ 's' if agents|length != 1 else '' }} enregistré{{ 's' if agents|length != 1 else '' }}.</p>
+
+<div class="card" style="margin-top:1.2rem;">
+  <div class="table-toolbar">
+    <span style="font-weight:700; font-size:0.9rem;">Comptes</span>
+    <a class="btn btn-primary btn-sm" style="margin-left:auto;" href="{{ url_for('admin.agents_create') }}">+ Créer un agent</a>
+  </div>
+  <div class="table-wrap">
+    <table class="pro">
+      <thead><tr><th>Nom</th><th>Identifiant</th><th>Rôle</th><th>Statut</th><th>Dernière connexion</th><th>Actions</th></tr></thead>
+      <tbody>
+        {% for a in agents %}
+          <tr>
+            <td><span class="avatar-sm">{{ a.nom_complet[:2]|upper }}</span>{{ a.nom_complet }}</td>
+            <td>{{ a.nom_utilisateur }}</td>
+            <td>{{ 'Administrateur' if a.role == 'administrateur' else 'Agent' }}</td>
+            <td>{% if a.actif %}<span class="badge badge-success">Actif</span>{% else %}<span class="badge badge-danger">Inactif</span>{% endif %}</td>
+            <td>{{ a.derniere_connexion.strftime('%d/%m/%Y %H:%M') if a.derniere_connexion else 'Jamais' }}</td>
+            <td class="row-actions">
+              <a class="btn btn-ghost btn-sm" href="{{ url_for('admin.agents_detail', user_id=a.id) }}">Voir</a>
+              <a class="btn btn-secondary btn-sm" href="{{ url_for('admin.agents_edit', user_id=a.id) }}">Modifier</a>
+              {% if a.actif %}
+                <form method="post" action="{{ url_for('admin.agents_deactivate', user_id=a.id) }}" style="display:inline;"
+                      data-confirm="Voulez-vous désactiver le compte de {{ a.nom_complet }} ? Il ne pourra plus se connecter tant qu'il ne sera pas réactivé.">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button class="btn btn-danger btn-sm" type="submit" {% if a.id == session.get('user_id') %}disabled title="Vous ne pouvez pas désactiver votre propre compte"{% endif %}>Désactiver</button>
+                </form>
+              {% else %}
+                <form method="post" action="{{ url_for('admin.agents_activate', user_id=a.id) }}" style="display:inline;">
+                  <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+                  <button class="btn btn-primary btn-sm" type="submit">Activer</button>
+                </form>
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

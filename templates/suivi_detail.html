@@ -1,0 +1,98 @@
+{% extends "layout.html" %}
+
+{% block title %}Suivi #{{ s.id_suivi }} - AgriSIG{% endblock %}
+
+{% macro row(label, value, unit='') %}
+  <tr>
+    <td class="fiche-k">{{ label }}</td>
+    <td class="fiche-v">{{ (value ~ ' ' ~ unit) if value is not none and value != '' else '—' }}</td>
+  </tr>
+{% endmacro %}
+
+{% block content %}
+<div class="admin-nav">
+  <a href="{{ url_for('admin.dashboard') }}">Vue d'ensemble</a>
+  <a href="{{ url_for('admin.suivis_list') }}" class="is-active">Gestion des suivis</a>
+  {% if session.get('role') == 'administrateur' %}
+    <a href="{{ url_for('admin.agents_list') }}">Gestion des agents</a>
+    <a href="{{ url_for('admin.historique') }}">Historique des connexions</a>
+    <a href="{{ url_for('admin.journal') }}">Journal des activités</a>
+  {% endif %}
+</div>
+
+<div class="card">
+  <div class="fiche-toolbar">
+    <h2>Suivi #{{ s.id_suivi }} — {{ s.nom_cooperative }}, campagne {{ s.annee }}</h2>
+    <a class="btn btn-download btn-sm" href="{{ url_for('admin.suivis_download', id_suivi=s.id_suivi) }}">📄 Télécharger (PDF)</a>
+  </div>
+
+  <div class="fiche-paper">
+    <h3 class="fiche-title">FICHE DE SUIVI DE CAMPAGNE AGRICOLE</h3>
+    <p class="fiche-sub">Périmètre irrigué de Djagblé — Campagne {{ s.annee }}</p>
+
+    <table class="fiche-table">
+      <tr><td class="fiche-caption" colspan="2">Informations générales</td></tr>
+      {{ row('Campagne', s.annee) }}
+      {{ row('Coopérative', s.nom_cooperative) }}
+      {{ row('Variété', s.nom_variete) }}
+    </table>
+
+    <table class="fiche-table">
+      <tr><td class="fiche-caption" colspan="2">Effectifs</td></tr>
+      {{ row('Hommes', s.effectif_hommes) }}
+      {{ row('Femmes', s.effectif_femmes) }}
+    </table>
+
+    <table class="fiche-table">
+      <tr><td class="fiche-caption" colspan="2">Superficies</td></tr>
+      {{ row('Superficie attribuée', s.superficie_attribuee, 'ha') }}
+      {{ row('Superficie cultivée', s.superficie_cultivee, 'ha') }}
+    </table>
+
+    <table class="fiche-table">
+      <tr><td class="fiche-caption" colspan="2">Travaux agricoles</td></tr>
+      {{ row('Début labour', s.date_debut_labour|fmt_date) }}
+      {{ row('Fin labour', s.date_fin_labour|fmt_date) }}
+      {{ row('Début mise en boue', s.date_debut_mise_boue|fmt_date) }}
+      {{ row('Fin mise en boue', s.date_fin_mise_boue|fmt_date) }}
+      {{ row('Pépinière', s.date_pepiniere|fmt_date) }}
+      {{ row('Repiquage', s.date_repiquage|fmt_date) }}
+      {{ row('1er désherbage', s.date_1_desherbage|fmt_date) }}
+      {{ row('2e désherbage', s.date_2_desherbage|fmt_date) }}
+      {{ row('Début épandage NPK', s.date_debut_epandage_npk|fmt_date) }}
+      {{ row('Fin épandage NPK', s.date_fin_epandage_npk|fmt_date) }}
+      {{ row('Épandage urée', s.date_epandage_uree|fmt_date) }}
+    </table>
+
+    <table class="fiche-table">
+      <tr><td class="fiche-caption" colspan="2">Intrants</td></tr>
+      {{ row('NPK', s.qte_npk, 'kg') }}
+      {{ row('Urée', s.qte_uree, 'kg') }}
+      {{ row('Herbicide', s.qte_herbicide, 'L') }}
+      {{ row('Insecticide', s.qte_insecticide, 'L') }}
+    </table>
+
+    <table class="fiche-table">
+      <tr><td class="fiche-caption" colspan="2">Récolte &amp; commercialisation</td></tr>
+      {{ row('Date de récolte', s.date_recolte|fmt_date) }}
+      {{ row('Production', s.production_kg, 'kg') }}
+      {{ row('Rendement', s.rendement_ha, 'kg/ha') }}
+      {{ row('Disponibilité agrégateur', 'Oui' if s.disponibilite_agregateur else ('Non' if s.disponibilite_agregateur is not none else None)) }}
+      {{ row('Production écoulée', s.production_ecoulee, 'kg') }}
+      {{ row('Production restante', s.production_restante, 'kg') }}
+    </table>
+  </div>
+
+  <div style="margin-top:1.6rem; display:flex; gap:0.6rem; flex-wrap:wrap;">
+    <a class="btn btn-secondary btn-sm" href="{{ url_for('admin.suivis_list') }}">← Retour à la liste</a>
+    <a class="btn btn-primary btn-sm" href="{{ url_for('admin.suivis_edit', id_suivi=s.id_suivi) }}">Modifier ce suivi</a>
+    {% if session.get('role') == 'administrateur' %}
+      <form method="post" action="{{ url_for('admin.suivis_delete', id_suivi=s.id_suivi) }}"
+            data-confirm="Attention : cette action supprimera définitivement ce suivi de campagne. Cette opération est irréversible. Voulez-vous continuer ?">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}" />
+        <button class="btn btn-danger btn-sm" type="submit">Supprimer</button>
+      </form>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

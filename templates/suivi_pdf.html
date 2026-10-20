@@ -1,0 +1,78 @@
+<!-- Gabarit dédié à la génération PDF (services/pdf_service.py, via xhtml2pdf).
+     Document HTML autonome : pas de layout.html, pas de variables CSS, pas de
+     JS — uniquement le sous-ensemble de CSS que xhtml2pdf sait interpréter. -->
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @page { size: A4; margin: 2cm 1.6cm; }
+  body { font-family: "Times New Roman", Times, serif; font-size: 11pt; color: #111111; }
+  h1 { text-align: center; font-size: 16pt; margin: 0 0 4px 0; font-weight: bold; }
+  p.sub { text-align: center; color: #555555; font-size: 11pt; margin: 0 0 18px 0; font-weight: bold; }
+  table { width: 100%; border-collapse: collapse; margin-bottom: 14px; }
+  td.caption { text-align: left; font-weight: bold; font-size: 12pt; background-color: #dcf3e8; color: #123f2c; padding: 5px 8px; border: 1px solid #999999; }
+  td.k { width: 42%; background-color: #faf8f2; border: 1px solid #999999; padding: 5px 8px; font-weight: bold; }
+  td.v { border: 1px solid #999999; padding: 5px 8px; font-weight: bold; }
+  p.footer { margin-top: 20px; font-size: 9pt; color: #777777; text-align: center; }
+</style>
+</head>
+<body>
+  <h1>FICHE DE SUIVI DE CAMPAGNE AGRICOLE</h1>
+  <p class="sub">Périmètre irrigué de Djagblé — Campagne {{ s.annee }}</p>
+
+  <table>
+    <tr><td class="caption" colspan="2">Informations générales</td></tr>
+    <tr><td class="k">Campagne</td><td class="v">{{ s.annee }}</td></tr>
+    <tr><td class="k">Coopérative</td><td class="v">{{ s.nom_cooperative }}</td></tr>
+    <tr><td class="k">Variété</td><td class="v">{{ s.nom_variete }}</td></tr>
+  </table>
+
+  <table>
+    <tr><td class="caption" colspan="2">Effectifs</td></tr>
+    <tr><td class="k">Hommes</td><td class="v">{{ s.effectif_hommes if s.effectif_hommes is not none else '—' }}</td></tr>
+    <tr><td class="k">Femmes</td><td class="v">{{ s.effectif_femmes if s.effectif_femmes is not none else '—' }}</td></tr>
+  </table>
+
+  <table>
+    <tr><td class="caption" colspan="2">Superficies</td></tr>
+    <tr><td class="k">Superficie attribuée</td><td class="v">{{ (s.superficie_attribuee ~ ' ha') if s.superficie_attribuee is not none else '—' }}</td></tr>
+    <tr><td class="k">Superficie cultivée</td><td class="v">{{ (s.superficie_cultivee ~ ' ha') if s.superficie_cultivee is not none else '—' }}</td></tr>
+  </table>
+
+  <table>
+    <tr><td class="caption" colspan="2">Travaux agricoles</td></tr>
+    <tr><td class="k">Début labour</td><td class="v">{{ s.date_debut_labour|fmt_date }}</td></tr>
+    <tr><td class="k">Fin labour</td><td class="v">{{ s.date_fin_labour|fmt_date }}</td></tr>
+    <tr><td class="k">Début mise en boue</td><td class="v">{{ s.date_debut_mise_boue|fmt_date }}</td></tr>
+    <tr><td class="k">Fin mise en boue</td><td class="v">{{ s.date_fin_mise_boue|fmt_date }}</td></tr>
+    <tr><td class="k">Pépinière</td><td class="v">{{ s.date_pepiniere|fmt_date }}</td></tr>
+    <tr><td class="k">Repiquage</td><td class="v">{{ s.date_repiquage|fmt_date }}</td></tr>
+    <tr><td class="k">1er désherbage</td><td class="v">{{ s.date_1_desherbage|fmt_date }}</td></tr>
+    <tr><td class="k">2e désherbage</td><td class="v">{{ s.date_2_desherbage|fmt_date }}</td></tr>
+    <tr><td class="k">Début épandage NPK</td><td class="v">{{ s.date_debut_epandage_npk|fmt_date }}</td></tr>
+    <tr><td class="k">Fin épandage NPK</td><td class="v">{{ s.date_fin_epandage_npk|fmt_date }}</td></tr>
+    <tr><td class="k">Épandage urée</td><td class="v">{{ s.date_epandage_uree|fmt_date }}</td></tr>
+  </table>
+
+  <table>
+    <tr><td class="caption" colspan="2">Intrants</td></tr>
+    <tr><td class="k">NPK</td><td class="v">{{ (s.qte_npk ~ ' kg') if s.qte_npk is not none else '—' }}</td></tr>
+    <tr><td class="k">Urée</td><td class="v">{{ (s.qte_uree ~ ' kg') if s.qte_uree is not none else '—' }}</td></tr>
+    <tr><td class="k">Herbicide</td><td class="v">{{ (s.qte_herbicide ~ ' L') if s.qte_herbicide is not none else '—' }}</td></tr>
+    <tr><td class="k">Insecticide</td><td class="v">{{ (s.qte_insecticide ~ ' L') if s.qte_insecticide is not none else '—' }}</td></tr>
+  </table>
+
+  <table>
+    <tr><td class="caption" colspan="2">Récolte &amp; commercialisation</td></tr>
+    <tr><td class="k">Date de récolte</td><td class="v">{{ s.date_recolte|fmt_date }}</td></tr>
+    <tr><td class="k">Production</td><td class="v">{{ (s.production_kg ~ ' kg') if s.production_kg is not none else '—' }}</td></tr>
+    <tr><td class="k">Rendement</td><td class="v">{{ (s.rendement_ha ~ ' kg/ha') if s.rendement_ha is not none else '—' }}</td></tr>
+    <tr><td class="k">Disponibilité agrégateur</td><td class="v">{{ 'Oui' if s.disponibilite_agregateur else ('Non' if s.disponibilite_agregateur is not none else '—') }}</td></tr>
+    <tr><td class="k">Production écoulée</td><td class="v">{{ (s.production_ecoulee ~ ' kg') if s.production_ecoulee is not none else '—' }}</td></tr>
+    <tr><td class="k">Production restante</td><td class="v">{{ (s.production_restante ~ ' kg') if s.production_restante is not none else '—' }}</td></tr>
+  </table>
+
+  <p class="footer">Document généré automatiquement par AgriSIG Djagblé — Suivi n°{{ s.id_suivi }}</p>
+</body>
+</html>

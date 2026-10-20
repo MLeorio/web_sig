@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block title %}Connexion - AgriSIG{% endblock %}
+
+{% block content %}
+<div class="login-split">
+  <div class="login-visual">
+    <div class="hero-bg" style="background-image: url('{{ url_for('static', filename='images/hero-background.jpg') }}');"></div>
+    <div class="hero-tint login-tint"></div>
+    <div class="login-visual-content">
+      <div class="login-brandmark">
+        <span class="brand-mark">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 20C4 20 5 10 12 6C19 10 20 20 20 20" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M12 6V20" stroke="#fff" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </span>
+        AgriSIG Djagblé
+      </div>
+      <div>
+        <h2>Suivez le périmètre irrigué de Djagblé, campagne après campagne.</h2>
+        <p>Connexion réservée aux agents et à l'administration pour la saisie et la gestion des suivis.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-form-side">
+    <h1>Connexion</h1>
+    <p class="hero-text" style="margin-bottom:1.5rem;">Entrez votre identifiant et votre mot de passe.</p>
+
+    <form method="post">
+      {{ form.hidden_tag() }}
+      <div class="field">
+        {{ form.username.label }}
+        {{ form.username(placeholder="Votre identifiant", required=true, autofocus=true) }}
+      </div>
+      <div class="field">
+        {{ form.password.label }}
+        {{ form.password(placeholder="Votre mot de passe", required=true, type="password") }}
+      </div>
+      <button class="btn btn-primary btn-block" type="submit" style="margin-top: 1.3rem;">Se connecter</button>
+    </form>
+    <p class="login-note">Simple visiteur ? <a href="{{ url_for('main.index') }}">Retour à l'accueil</a></p>
+  </div>
+</div>
+{% endblock %}
